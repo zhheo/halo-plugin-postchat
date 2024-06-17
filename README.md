@@ -3,7 +3,7 @@
         <img src="/imgs/st.jpg" alt="icon"/>
     </a>
     <h1 align="center">PostChat</h1>
-    <span>PostChat的Halo插件，也支持仅文章摘要用户使用</span>
+    <span>PostChat的Halo插件，也支持文章摘要用户使用</span>
 </div>
 
 ## 简介
