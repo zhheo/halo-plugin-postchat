@@ -25,7 +25,7 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 ## 本插件在Halo中的表现
 
-[预览地址](https://halo.zhheo.com/)
+[预览地址](https://halo.zhheo.com/archives/hello-halo?t=1718622013616)
 
 ## PostChat在更多网站中的表现
 
