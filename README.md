@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="https://halo.zhheo.com/" target="_blank" rel="noopener noreferrer">
+    <a href="https://ai.tianli0.top/" target="_blank" rel="noopener noreferrer">
         <img src="/imgs/st.jpg" alt="icon"/>
     </a>
     <h1 align="center">PostChat</h1>
