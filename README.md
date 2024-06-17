@@ -23,6 +23,16 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 更多功能可以参见：https://ai.tianli0.top/
 
+## 本插件在Halo中的表现
+
+[预览地址](https://halo.zhheo.com/)
+
+## PostChat在更多网站中的表现
+
+[张洪Heo](https://blog.zhheo.com/)
+
+[Tianli](https://tianli-blog.club/)
+
 ## 安装方式
 
 点击左侧的[release](https://github.com/zhheo/halo-plugin-postchat/releases)页面下载jar
