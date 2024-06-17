@@ -2,13 +2,9 @@
     <a href="https://halo.zhheo.com/" target="_blank" rel="noopener noreferrer">
         <img src="/imgs/st.jpg" alt="icon"/>
     </a>
-    <h1 align="center">HeoLink</h1>
-    <span>一个基于导航管理插件的主题，用于快捷搭建一个简约的导航站。</span>
+    <h1 align="center">PostChat</h1>
+    <span>PostChat的Halo插件，也支持仅文章摘要用户使用</span>
 </div>
-
-# halo-plugin-postchat
-
-PostChat的Halo插件，也支持仅文章摘要用户使用
 
 ![](/imgs/quickshot.jpg)
 
