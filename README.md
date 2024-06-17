@@ -31,6 +31,16 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 选择“本地上传”，将jar包拖拽进来即可
 
+## 插件配置
+
+插件页面点击详情
+
+![](/imgs/help1.jpg)
+
+在顶部进行配置
+
+![](/imgs/help2.jpg)
+
 ## 开发者
 
 PostChat由[张洪Heo](https://github.com/zhheo)与[Tianli](https://github.com/TIANLI0)共同构建，技术支持请联系：zhheo@qq.com（一个工作日内回复）
