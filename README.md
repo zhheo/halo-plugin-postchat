@@ -6,9 +6,9 @@
     <span>PostChat的Halo插件，也支持仅文章摘要用户使用</span>
 </div>
 
-![](/imgs/quickshot.jpg)
-
 ## 简介
+
+![](/imgs/quickshot.jpg)
 
 PostChat是一个专为中小开发者与站长开发的AI增强工具，可以在网站中插入聊天机器人和智能摘要生成的功能。本项目提供专为Halo博客系统的插件安装包，你可以在Halo博客中安装使用，避免了插入代码的繁琐。
 
@@ -33,4 +33,4 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 ## 开发者
 
-PostChat由[zhheo](https://github.com/zhheo)与[Tianli](https://github.com/TIANLI0)共同构建，技术支持请联系：zhheo@qq.com（一个工作日内回复）
+PostChat由[张洪Heo](https://github.com/zhheo)与[Tianli](https://github.com/TIANLI0)共同构建，技术支持请联系：zhheo@qq.com（一个工作日内回复）
