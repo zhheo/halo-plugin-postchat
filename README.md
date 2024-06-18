@@ -51,6 +51,12 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 ![](/imgs/help2.jpg)
 
+## 主题适配
+
+此插件支持所有的PostChat开发API，提供主题开发者对于PostChat的控制能力。包括深色模式切换：`postChatUser.setPostChatTheme('dark')`；聊天窗口输入框：`postChatUser.setPostChatInput(content)`等。
+
+详见开发者文档：https://postchat.zhheo.com/advanced/theme.html
+
 ## 开发者
 
 PostChat由[张洪Heo](https://github.com/zhheo)与[Tianli](https://github.com/TIANLI0)共同构建，技术支持请联系：zhheo@qq.com（一个工作日内回复）
