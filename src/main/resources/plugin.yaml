@@ -1,0 +1,24 @@
+# Refer https://docs.halo.run/developer-guide/plugin/basics/manifest
+
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  # The name defines how the plugin is invoked, A unique name
+  name: postchat
+spec:
+  enabled: true
+  requires: ">=2.11.0"
+  author:
+    name: 张洪Heo
+    website: https://zhheo.com
+  logo: logo.png
+  homepage: https://ai.tianli0.top/
+  displayName: "PostChat"
+  repo: https://github.com/zhheo/halo-plugin-postchat
+  issues: https://github.com/zhheo/halo-plugin-postchat/issues
+  description: "文章摘要与智能对话插件"
+  settingName: "plugin-postchat-widget-settings"
+  configMapName: "plugin-postchat-widget-configmap"
+  license:
+    - name: "Custom License"
+      url: "https://github.com/zhheo/Post-Abstract-AI/blob/main/LICENSE"

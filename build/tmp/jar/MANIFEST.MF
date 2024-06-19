@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Plugin-Main-Class: run.halo.app.plugin.BasePlugin
+Build-Jdk-Spec: 17
+Implementation-Title: plugin-postchat
+Implementation-Version: 1.0.2
+
