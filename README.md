@@ -1,6 +1,6 @@
 <div align="center">
     <a href="https://ai.tianli0.top/" target="_blank" rel="noopener noreferrer">
-        <img src="/imgs/st.jpg" alt="icon"/>
+        <img src="https://img.zhheo.com/i/2024/06/21/6674f00f3eb9d.webp" alt="icon"/>
     </a>
     <h1 align="center">PostChat</h1>
     <span>PostChat的Halo插件，也支持文章摘要用户使用</span>
@@ -8,7 +8,7 @@
 
 ## 简介
 
-![](/imgs/quickshot.jpg)
+![quickshot.webp](https://img.zhheo.com/i/2024/06/21/6674f0133b5b3.webp)
 
 PostChat是一个专为中小开发者与站长开发的AI增强工具，可以在网站中插入聊天机器人和智能摘要生成的功能。本项目提供专为Halo博客系统的插件安装包，你可以在Halo博客中安装使用，避免了插入代码的繁琐。
 
@@ -45,11 +45,11 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 插件页面点击详情
 
-![](/imgs/help1.jpg)
+![help1.webp](https://img.zhheo.com/i/2024/06/21/6674f013d6251.webp)
 
 在顶部进行配置
 
-![](/imgs/help2.jpg)
+![help2.webp](https://img.zhheo.com/i/2024/06/21/6674f0135aab6.webp)
 
 ## 主题适配
 

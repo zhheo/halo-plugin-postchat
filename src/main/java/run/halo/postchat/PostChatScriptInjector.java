@@ -119,7 +119,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         } else if (postChatConfig.isEnableAI()) {
             scriptUrl = "https://ai.tianli0.top/static/public/postChatUser.min.js";
         } else if (summaryConfig.isEnableSummary()) {
-            scriptUrl = "https://cdn1.tianli0.top/gh/zhheo/Post-Abstract-AI@0.18.1/tianli_gpt.min.js";
+            scriptUrl = "https://ai.tianli0.top/static/public/tianli_gpt.min.js";
             cssLink = "<link rel=\"stylesheet\" href=\"${summary_style}\">";
         }
 
