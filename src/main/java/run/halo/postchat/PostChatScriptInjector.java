@@ -12,6 +12,8 @@ import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import reactor.core.publisher.Mono;
 import run.halo.app.theme.dialect.TemplateHeadProcessor;
 import run.halo.app.plugin.SettingFetcher;
+import reactor.core.scheduler.Schedulers;
+
 
 import java.util.Properties;
 
@@ -28,8 +30,24 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
     public Mono<Void> process(ITemplateContext context, IModel model,
                               IElementModelStructureHandler structureHandler) {
         final IModelFactory modelFactory = context.getModelFactory();
-        model.add(modelFactory.createText(postChatScript()));
-        return Mono.empty();
+
+        return Mono.zip(
+            fetchSetting("chat", PostChatConfig.class),
+            fetchSetting("account", AccountConfig.class),
+            fetchSetting("summary", SummaryConfig.class)
+        ).flatMap(tuple -> {
+            PostChatConfig postChatConfig = tuple.getT1().orElse(new PostChatConfig());
+            AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
+            SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
+
+            model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
+            return Mono.empty();
+        });
+    }
+
+    private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
+        return Mono.fromCallable(() -> settingFetcher.fetch(group, clazz))
+                   .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Data
@@ -70,17 +88,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private boolean typingAnimate;
     }
 
-    private String postChatScript() {
-
-        var postChatConfig = settingFetcher.fetch("chat", PostChatConfig.class)
-            .orElse(new PostChatConfig());
-
-        var accountConfig = settingFetcher.fetch("account", AccountConfig.class)
-            .orElse(new AccountConfig());
-
-        var summaryConfig = settingFetcher.fetch("summary", SummaryConfig.class)
-            .orElse(new SummaryConfig());
-
+    private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
         final Properties properties = new Properties();
         properties.setProperty("enableAI", String.valueOf(postChatConfig.isEnableAI()));
         properties.setProperty("backgroundColor", postChatConfig.getBackgroundColor());
