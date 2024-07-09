@@ -35,7 +35,7 @@ PostChat是一个专为中小开发者与站长开发的AI增强工具，可以�
 
 ## 安装方式
 
-点击左侧的[release](https://github.com/zhheo/halo-plugin-postchat/releases)页面下载jar
+点击右侧的[release](https://github.com/zhheo/halo-plugin-postchat/releases)页面下载jar
 
 在Halo的管理员后台点击“插件”，点击右上角的安装
 
