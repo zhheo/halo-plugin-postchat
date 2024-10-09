@@ -14,7 +14,6 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 import run.halo.app.plugin.SettingFetcher;
 import reactor.core.scheduler.Schedulers;
 
-
 import java.util.Properties;
 
 @Component
@@ -86,6 +85,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private String blacklist;
         private String wordLimit;
         private boolean typingAnimate;
+        private String beginningText;
     }
 
     private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
@@ -105,10 +105,10 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("userDesc", String.valueOf(postChatConfig.getUserDesc()));
         properties.setProperty("addButton", String.valueOf(postChatConfig.isAddButton()));
 
-        //账户设置
+        // 账户设置
         properties.setProperty("account_key", String.valueOf(accountConfig.getKey()));
 
-        //文章摘要设置
+        // 文章摘要设置
         properties.setProperty("enableSummary", String.valueOf(summaryConfig.isEnableSummary()));
         properties.setProperty("summary_postSelector", String.valueOf(summaryConfig.getPostSelector()));
         properties.setProperty("summary_title", String.valueOf(summaryConfig.getTitle()));
@@ -117,6 +117,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("summary_blacklist", String.valueOf(summaryConfig.getBlacklist()));
         properties.setProperty("summary_wordLimit", String.valueOf(summaryConfig.getWordLimit()));
         properties.setProperty("summary_typingAnimate", String.valueOf(summaryConfig.isTypingAnimate()));
+        properties.setProperty("summary_beginningText", String.valueOf(summaryConfig.getBeginningText())); // 新增的配置项
 
         String scriptUrl = "";
         String cssLink = "";
@@ -159,7 +160,8 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
           showInviteLink: ${showInviteLink},
           userTitle: "${userTitle}",
           userDesc: "${userDesc}",
-          addButton: ${addButton}
+          addButton: ${addButton},
+          beginningText: "${summary_beginningText}"
         };
         </script>
         <script data-postChat_key="${account_key}" src="%s"></script>

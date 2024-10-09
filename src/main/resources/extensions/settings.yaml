@@ -73,6 +73,13 @@ spec:
           key: typingAnimate
           value: true
           help: "智能的打字效果，模拟流处理的感觉"
+        - $formkit: text
+          label: 自定义开头语
+          name: beginningText
+          id: beginningText
+          key: beginningText
+          value: "这篇文章介绍了"
+          help: "默认为“这篇文章介绍了”，你可以自定义开头语。"
     - group: chat
       label: 智能对话
       formSchema:
