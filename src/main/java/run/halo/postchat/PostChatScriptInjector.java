@@ -86,6 +86,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private String wordLimit;
         private boolean typingAnimate;
         private String beginningText;
+        private String summaryTheme;
     }
 
     private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
@@ -118,6 +119,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("summary_wordLimit", String.valueOf(summaryConfig.getWordLimit()));
         properties.setProperty("summary_typingAnimate", String.valueOf(summaryConfig.isTypingAnimate()));
         properties.setProperty("summary_beginningText", String.valueOf(summaryConfig.getBeginningText())); // 新增的配置项
+        properties.setProperty("summary_theme", String.valueOf(summaryConfig.getSummaryTheme()));
 
         String scriptUrl = "";
         String cssLink = "";
@@ -147,6 +149,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         let tianliGPT_blacklist = '${summary_blacklist}';
         let tianliGPT_wordLimit = '${summary_wordLimit}';
         let tianliGPT_typingAnimate = ${summary_typingAnimate};
+        let tianliGPT_theme = '${summary_theme}';
         var postChatConfig = {
           backgroundColor: "${backgroundColor}",
           bottom: "${bottom}",
