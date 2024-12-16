@@ -14,6 +14,8 @@ import run.halo.app.theme.dialect.TemplateHeadProcessor;
 import run.halo.app.plugin.SettingFetcher;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 @Component
@@ -66,6 +68,10 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private String userTitle;
         private String userDesc;
         private boolean addButton;
+        private String userIcon;
+        private List<QuestionItem> defaultChatQuestions = new ArrayList<>();
+        private List<QuestionItem> defaultSearchQuestions = new ArrayList<>();
+        private String userMode = "magic";
     }
 
     @Data
@@ -89,6 +95,11 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private String summaryTheme;
     }
 
+    @Data
+    public static class QuestionItem {
+        private String question;
+    }
+
     private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
         final Properties properties = new Properties();
         properties.setProperty("enableAI", String.valueOf(postChatConfig.isEnableAI()));
@@ -105,6 +116,13 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("userTitle", String.valueOf(postChatConfig.getUserTitle()));
         properties.setProperty("userDesc", String.valueOf(postChatConfig.getUserDesc()));
         properties.setProperty("addButton", String.valueOf(postChatConfig.isAddButton()));
+        properties.setProperty("userIcon", String.valueOf(postChatConfig.getUserIcon()));
+
+        String defaultChatQuestionsJson = arrayToJsonString(postChatConfig.getDefaultChatQuestions());
+        String defaultSearchQuestionsJson = arrayToJsonString(postChatConfig.getDefaultSearchQuestions());
+
+        properties.setProperty("defaultChatQuestions", defaultChatQuestionsJson);
+        properties.setProperty("defaultSearchQuestions", defaultSearchQuestionsJson);
 
         // 账户设置
         properties.setProperty("account_key", String.valueOf(accountConfig.getKey()));
@@ -120,6 +138,8 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("summary_typingAnimate", String.valueOf(summaryConfig.isTypingAnimate()));
         properties.setProperty("summary_beginningText", String.valueOf(summaryConfig.getBeginningText())); // 新增的配置项
         properties.setProperty("summary_theme", String.valueOf(summaryConfig.getSummaryTheme()));
+
+        properties.setProperty("userMode", String.valueOf(postChatConfig.getUserMode()));
 
         String scriptUrl = "";
         String cssLink = "";
@@ -164,15 +184,37 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
           userTitle: "${userTitle}",
           userDesc: "${userDesc}",
           addButton: ${addButton},
-          beginningText: "${summary_beginningText}"
+          beginningText: "${summary_beginningText}",
+          userIcon: "${userIcon}",
+          defaultChatQuestions: %s,
+          defaultSearchQuestions: %s,
+          userMode: "${userMode}"
         };
         </script>
         <script data-postChat_key="${account_key}" src="%s"></script>
         <!-- PostChat Plugin end -->
         """;
 
-        String script = String.format(scriptTemplate, cssLink, scriptUrl);
+        String script = String.format(scriptTemplate, cssLink, defaultChatQuestionsJson, defaultSearchQuestionsJson, scriptUrl);
 
         return PROPERTY_PLACEHOLDER_HELPER.replacePlaceholders(script, properties);
+    }
+
+    private String arrayToJsonString(List<QuestionItem> items) {
+        if (items == null || items.isEmpty()) {
+            return "[]";
+        }
+        StringBuilder json = new StringBuilder("[");
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) {
+                json.append(",");
+            }
+            String question = items.get(i).getQuestion();
+            if (question != null) {
+                json.append("\"").append(question.replace("\"", "\\\"")).append("\"");
+            }
+        }
+        json.append("]");
+        return json.toString();
     }
 }

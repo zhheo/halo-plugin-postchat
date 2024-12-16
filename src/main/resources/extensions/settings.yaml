@@ -97,6 +97,18 @@ spec:
           key: enableAI
           value: true
           help: "添加按钮点击对话的功能，如果你并非PostChat用户，而是仅文章摘要用户，建议关闭此功能"
+        - $formkit: select
+          label: PostChat模式
+          name: userMode
+          id: userMode
+          key: userMode
+          value: "magic"
+          options:
+            - label: Magic模式
+              value: magic
+            - label: iframe模式
+              value: iframe
+          help: "选择PostChat的展示模式，Magic模式为默认推荐模式，iframe模式为兼容模式"
         - $formkit: color
           label: 背景颜色
           name: backgroundColor
@@ -139,6 +151,7 @@ spec:
           key: frameWidth
           value: "375px"
           help: "调整聊天界面框架的宽度"
+          if: $get(userMode).value == "iframe"
         - $formkit: text
           label: 框架高度
           name: frameHeight
@@ -146,6 +159,37 @@ spec:
           key: frameHeight
           value: "600px"
           help: "调整聊天界面框架的高度"
+          if: $get(userMode).value == "iframe"
+        - $formkit: repeater
+          label: 默认问题列表
+          name: defaultChatQuestions
+          id: defaultChatQuestions
+          key: defaultChatQuestions
+          value: []
+          help: "添加多个默认问题，用户可以快速点击这些问题进行提问"
+          if: $get(userMode).value == "magic"
+          children:
+            - $formkit: text
+              label: 问题内容
+              name: question
+              id: question
+              key: question
+              value: ""
+        - $formkit: repeater
+          label: 默认搜索列表
+          name: defaultSearchQuestions
+          id: defaultSearchQuestions
+          key: defaultSearchQuestions
+          value: []
+          help: "添加多个默认搜索关键词，用户可以快速点击这些关键词进行搜索"
+          if: $get(userMode).value == "magic"
+          children:
+            - $formkit: text
+              label: 搜索关键词
+              name: question
+              id: question
+              key: question
+              value: ""
         - $formkit: checkbox
           label: 默认输入
           name: defaultInput
@@ -181,6 +225,14 @@ spec:
           key: userDesc
           value: "如果你对网站的内容有任何疑问，可以来问我哦～"
           help: "你要自定义的PostChat聊天界面描述"
+        - $formkit: attachment
+          label: 界面图标
+          name: userIcon
+          id: userIcon
+          key: userIcon
+          value: ""
+          if: $get(userMode).value == "magic"
+          help: "你要自定义的PostChat界面图标"
         - $formkit: checkbox
           label: 是否显示按钮
           name: addButton
