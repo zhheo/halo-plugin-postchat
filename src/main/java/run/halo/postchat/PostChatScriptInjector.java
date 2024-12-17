@@ -34,28 +34,23 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         final IModelFactory modelFactory = context.getModelFactory();
 
         return Mono.zip(
-            fetchSetting("chat", PostChatConfig.class).doOnNext(config -> 
-                System.out.println("Fetched chat config: " + config)),
+            fetchSetting("chat", PostChatConfig.class),
             fetchSetting("account", AccountConfig.class),
             fetchSetting("summary", SummaryConfig.class)
         ).flatMap(tuple -> {
             PostChatConfig postChatConfig = tuple.getT1().orElse(new PostChatConfig());
             AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
             SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
-
-            System.out.println("Raw chat questions config: " + postChatConfig.getDefaultChatQuestions());
             
             model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
             return Mono.empty();
-        });
+        }).then()
+        .subscribeOn(Schedulers.boundedElastic());
     }
 
     private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
-        return Mono.fromCallable(() -> {
-            var result = settingFetcher.fetch(group, clazz);
-            System.out.println("Fetched settings for " + group + ": " + result);
-            return result;
-        }).subscribeOn(Schedulers.boundedElastic());
+        return Mono.fromCallable(() -> settingFetcher.fetch(group, clazz))
+            .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Data
@@ -109,11 +104,6 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
     }
 
     private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
-        // 添加调试日志
-        System.out.println("PostChatConfig: " + postChatConfig);
-        System.out.println("DefaultChatQuestions: " + postChatConfig.getDefaultChatQuestions());
-        System.out.println("DefaultSearchQuestions: " + postChatConfig.getDefaultSearchQuestions());
-
         final Properties properties = new Properties();
         properties.setProperty("enableAI", String.valueOf(postChatConfig.isEnableAI()));
         properties.setProperty("backgroundColor", postChatConfig.getBackgroundColor());
@@ -134,23 +124,14 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
 
         // 修改数组格式化方式，添加空值检查
         String defaultChatQuestionsStr = postChatConfig.getDefaultChatQuestions().stream()
-                .filter(q -> q != null && q.getQuestion() != null)  // 使用 getQuestion()
-                .map(q -> {
-                    System.out.println("Processing question: " + q.getQuestion());
-                    return "\"" + q.getQuestion() + "\"";
-                })
+                .filter(q -> q != null && q.getQuestion() != null)
+                .map(q -> "\"" + q.getQuestion() + "\"")
                 .collect(Collectors.joining(","));
         
         String defaultSearchQuestionsStr = postChatConfig.getDefaultSearchQuestions().stream()
-                .filter(q -> q != null && q.getQuestion() != null)  // 使用 getQuestion()
-                .map(q -> {
-                    System.out.println("Processing search: " + q.getQuestion());
-                    return "\"" + q.getQuestion() + "\"";
-                })
+                .filter(q -> q != null && q.getQuestion() != null)
+                .map(q -> "\"" + q.getQuestion() + "\"")
                 .collect(Collectors.joining(","));
-
-        System.out.println("Formatted chat questions: " + defaultChatQuestionsStr);
-        System.out.println("Formatted search questions: " + defaultSearchQuestionsStr);
 
         properties.setProperty("defaultChatQuestions", defaultChatQuestionsStr);
         properties.setProperty("defaultSearchQuestions", defaultSearchQuestionsStr);
@@ -167,7 +148,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("summary_blacklist", String.valueOf(summaryConfig.getBlacklist()));
         properties.setProperty("summary_wordLimit", String.valueOf(summaryConfig.getWordLimit()));
         properties.setProperty("summary_typingAnimate", String.valueOf(summaryConfig.isTypingAnimate()));
-        properties.setProperty("summary_beginningText", String.valueOf(summaryConfig.getBeginningText())); // 新增的配置项
+        properties.setProperty("summary_beginningText", String.valueOf(summaryConfig.getBeginningText()));
         properties.setProperty("summary_theme", String.valueOf(summaryConfig.getSummaryTheme()));
 
         String scriptUrl = "";
