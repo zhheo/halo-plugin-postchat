@@ -33,19 +33,22 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         final IModelFactory modelFactory = context.getModelFactory();
 
         return Mono.zip(
-            Mono.fromCallable(() -> settingFetcher.fetch("chat", PostChatConfig.class).orElse(new PostChatConfig())),
-            Mono.fromCallable(() -> settingFetcher.fetch("account", AccountConfig.class).orElse(new AccountConfig())),
-            Mono.fromCallable(() -> settingFetcher.fetch("summary", SummaryConfig.class).orElse(new SummaryConfig()))
-        ).subscribeOn(Schedulers.boundedElastic())
-        .doOnNext(tuple -> {
-            PostChatConfig postChatConfig = tuple.getT1();
-            AccountConfig accountConfig = tuple.getT2();
-            SummaryConfig summaryConfig = tuple.getT3();
+            fetchSetting("chat", PostChatConfig.class),
+            fetchSetting("account", AccountConfig.class),
+            fetchSetting("summary", SummaryConfig.class)
+        ).flatMap(tuple -> {
+            PostChatConfig postChatConfig = tuple.getT1().orElse(new PostChatConfig());
+            AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
+            SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
 
-            String scriptContent = postChatScript(postChatConfig, accountConfig, summaryConfig);
-            model.add(modelFactory.createText(scriptContent));
-        })
-        .then();
+            model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
+            return Mono.empty();
+        });
+    }
+
+    private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
+        return Mono.fromCallable(() -> settingFetcher.fetch(group, clazz))
+                   .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Data
@@ -65,10 +68,10 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private String userTitle;
         private String userDesc;
         private boolean addButton;
-        private String userIcon;
-        private List<QuestionItem> defaultChatQuestions = new ArrayList<>();
-        private List<QuestionItem> defaultSearchQuestions = new ArrayList<>();
         private String userMode = "magic";
+        private String userIcon = "";
+        private List<String> defaultChatQuestions = new ArrayList<>();
+        private List<String> defaultSearchQuestions = new ArrayList<>();
     }
 
     @Data
@@ -92,11 +95,6 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private String summaryTheme;
     }
 
-    @Data
-    public static class QuestionItem {
-        private String question;
-    }
-
     private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
         final Properties properties = new Properties();
         properties.setProperty("enableAI", String.valueOf(postChatConfig.isEnableAI()));
@@ -113,13 +111,10 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("userTitle", String.valueOf(postChatConfig.getUserTitle()));
         properties.setProperty("userDesc", String.valueOf(postChatConfig.getUserDesc()));
         properties.setProperty("addButton", String.valueOf(postChatConfig.isAddButton()));
-        properties.setProperty("userIcon", String.valueOf(postChatConfig.getUserIcon()));
-
-        String defaultChatQuestionsJson = arrayToJsonString(postChatConfig.getDefaultChatQuestions());
-        String defaultSearchQuestionsJson = arrayToJsonString(postChatConfig.getDefaultSearchQuestions());
-
-        properties.setProperty("defaultChatQuestions", defaultChatQuestionsJson);
-        properties.setProperty("defaultSearchQuestions", defaultSearchQuestionsJson);
+        properties.setProperty("userMode", postChatConfig.getUserMode());
+        properties.setProperty("userIcon", postChatConfig.getUserIcon());
+        properties.setProperty("defaultChatQuestions", String.join(",", postChatConfig.getDefaultChatQuestions()));
+        properties.setProperty("defaultSearchQuestions", String.join(",", postChatConfig.getDefaultSearchQuestions()));
 
         // 账户设置
         properties.setProperty("account_key", String.valueOf(accountConfig.getKey()));
@@ -135,8 +130,6 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("summary_typingAnimate", String.valueOf(summaryConfig.isTypingAnimate()));
         properties.setProperty("summary_beginningText", String.valueOf(summaryConfig.getBeginningText())); // 新增的配置项
         properties.setProperty("summary_theme", String.valueOf(summaryConfig.getSummaryTheme()));
-
-        properties.setProperty("userMode", String.valueOf(postChatConfig.getUserMode()));
 
         String scriptUrl = "";
         String cssLink = "";
@@ -182,36 +175,18 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
           userDesc: "${userDesc}",
           addButton: ${addButton},
           beginningText: "${summary_beginningText}",
+          userMode: "${userMode}",
           userIcon: "${userIcon}",
-          defaultChatQuestions: %s,
-          defaultSearchQuestions: %s,
-          userMode: "${userMode}"
+          defaultChatQuestions: [${defaultChatQuestions}],
+          defaultSearchQuestions: [${defaultSearchQuestions}]
         };
         </script>
         <script data-postChat_key="${account_key}" src="%s"></script>
         <!-- PostChat Plugin end -->
         """;
 
-        String script = String.format(scriptTemplate, cssLink, defaultChatQuestionsJson, defaultSearchQuestionsJson, scriptUrl);
+        String script = String.format(scriptTemplate, cssLink, scriptUrl);
 
         return PROPERTY_PLACEHOLDER_HELPER.replacePlaceholders(script, properties);
-    }
-
-    private String arrayToJsonString(List<QuestionItem> items) {
-        if (items == null || items.isEmpty()) {
-            return "[]";
-        }
-        StringBuilder json = new StringBuilder("[");
-        for (int i = 0; i < items.size(); i++) {
-            if (i > 0) {
-                json.append(",");
-            }
-            String question = items.get(i).getQuestion();
-            if (question != null) {
-                json.append("\"").append(question.replace("\"", "\\\"")).append("\"");
-            }
-        }
-        json.append("]");
-        return json.toString();
     }
 }
