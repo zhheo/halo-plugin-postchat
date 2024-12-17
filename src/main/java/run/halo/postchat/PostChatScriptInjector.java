@@ -11,13 +11,14 @@ import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import reactor.core.publisher.Mono;
 import run.halo.app.theme.dialect.TemplateHeadProcessor;
-import run.halo.app.plugin.SettingFetcher;
+import run.halo.app.plugin.ReactiveSettingFetcher;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
     static final PropertyPlaceholderHelper PROPERTY_PLACEHOLDER_HELPER = new PropertyPlaceholderHelper("${", "}");
 
     private final PluginWrapper pluginWrapper;
-    private final SettingFetcher settingFetcher;
+    private final ReactiveSettingFetcher reactiveSettingFetcher;
 
     @Override
     public Mono<Void> process(ITemplateContext context, IModel model,
@@ -49,7 +50,8 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
     }
 
     private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
-        return Mono.fromCallable(() -> settingFetcher.fetch(group, clazz))
+        return reactiveSettingFetcher.fetch(group, clazz)
+            .map(Optional::ofNullable)
             .subscribeOn(Schedulers.boundedElastic());
     }
 
