@@ -33,22 +33,19 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         final IModelFactory modelFactory = context.getModelFactory();
 
         return Mono.zip(
-            fetchSetting("chat", PostChatConfig.class),
-            fetchSetting("account", AccountConfig.class),
-            fetchSetting("summary", SummaryConfig.class)
-        ).flatMap(tuple -> {
-            PostChatConfig postChatConfig = tuple.getT1().orElse(new PostChatConfig());
-            AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
-            SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
+            Mono.fromCallable(() -> settingFetcher.fetch("chat", PostChatConfig.class).orElse(new PostChatConfig())),
+            Mono.fromCallable(() -> settingFetcher.fetch("account", AccountConfig.class).orElse(new AccountConfig())),
+            Mono.fromCallable(() -> settingFetcher.fetch("summary", SummaryConfig.class).orElse(new SummaryConfig()))
+        ).subscribeOn(Schedulers.boundedElastic())
+        .doOnNext(tuple -> {
+            PostChatConfig postChatConfig = tuple.getT1();
+            AccountConfig accountConfig = tuple.getT2();
+            SummaryConfig summaryConfig = tuple.getT3();
 
-            model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
-            return Mono.empty();
-        });
-    }
-
-    private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
-        return Mono.fromCallable(() -> settingFetcher.fetch(group, clazz))
-                   .subscribeOn(Schedulers.boundedElastic());
+            String scriptContent = postChatScript(postChatConfig, accountConfig, summaryConfig);
+            model.add(modelFactory.createText(scriptContent));
+        })
+        .then();
     }
 
     @Data
