@@ -17,6 +17,7 @@ import reactor.core.scheduler.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +34,8 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         final IModelFactory modelFactory = context.getModelFactory();
 
         return Mono.zip(
-            fetchSetting("chat", PostChatConfig.class),
+            fetchSetting("chat", PostChatConfig.class).doOnNext(config -> 
+                System.out.println("Fetched chat config: " + config)),
             fetchSetting("account", AccountConfig.class),
             fetchSetting("summary", SummaryConfig.class)
         ).flatMap(tuple -> {
@@ -41,14 +43,19 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
             AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
             SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
 
+            System.out.println("Raw chat questions config: " + postChatConfig.getDefaultChatQuestions());
+            
             model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
             return Mono.empty();
         });
     }
 
     private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
-        return Mono.fromCallable(() -> settingFetcher.fetch(group, clazz))
-                   .subscribeOn(Schedulers.boundedElastic());
+        return Mono.fromCallable(() -> {
+            var result = settingFetcher.fetch(group, clazz);
+            System.out.println("Fetched settings for " + group + ": " + result);
+            return result;
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @Data
@@ -70,8 +77,14 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         private boolean addButton;
         private String userMode = "magic";
         private String userIcon = "";
-        private List<String> defaultChatQuestions = new ArrayList<>();
-        private List<String> defaultSearchQuestions = new ArrayList<>();
+
+        @Data
+        public static class ChatQuestion {
+            private String question;
+        }
+
+        private List<ChatQuestion> defaultChatQuestions = new ArrayList<>();
+        private List<ChatQuestion> defaultSearchQuestions = new ArrayList<>();
     }
 
     @Data
@@ -96,6 +109,11 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
     }
 
     private String postChatScript(PostChatConfig postChatConfig, AccountConfig accountConfig, SummaryConfig summaryConfig) {
+        // 添加调试日志
+        System.out.println("PostChatConfig: " + postChatConfig);
+        System.out.println("DefaultChatQuestions: " + postChatConfig.getDefaultChatQuestions());
+        System.out.println("DefaultSearchQuestions: " + postChatConfig.getDefaultSearchQuestions());
+
         final Properties properties = new Properties();
         properties.setProperty("enableAI", String.valueOf(postChatConfig.isEnableAI()));
         properties.setProperty("backgroundColor", postChatConfig.getBackgroundColor());
@@ -113,8 +131,29 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         properties.setProperty("addButton", String.valueOf(postChatConfig.isAddButton()));
         properties.setProperty("userMode", postChatConfig.getUserMode());
         properties.setProperty("userIcon", postChatConfig.getUserIcon());
-        properties.setProperty("defaultChatQuestions", String.join(",", postChatConfig.getDefaultChatQuestions()));
-        properties.setProperty("defaultSearchQuestions", String.join(",", postChatConfig.getDefaultSearchQuestions()));
+
+        // 修改数组格式化方式，添加空值检查
+        String defaultChatQuestionsStr = postChatConfig.getDefaultChatQuestions().stream()
+                .filter(q -> q != null && q.getQuestion() != null)  // 使用 getQuestion()
+                .map(q -> {
+                    System.out.println("Processing question: " + q.getQuestion());
+                    return "\"" + q.getQuestion() + "\"";
+                })
+                .collect(Collectors.joining(","));
+        
+        String defaultSearchQuestionsStr = postChatConfig.getDefaultSearchQuestions().stream()
+                .filter(q -> q != null && q.getQuestion() != null)  // 使用 getQuestion()
+                .map(q -> {
+                    System.out.println("Processing search: " + q.getQuestion());
+                    return "\"" + q.getQuestion() + "\"";
+                })
+                .collect(Collectors.joining(","));
+
+        System.out.println("Formatted chat questions: " + defaultChatQuestionsStr);
+        System.out.println("Formatted search questions: " + defaultSearchQuestionsStr);
+
+        properties.setProperty("defaultChatQuestions", defaultChatQuestionsStr);
+        properties.setProperty("defaultSearchQuestions", defaultSearchQuestionsStr);
 
         // 账户设置
         properties.setProperty("account_key", String.valueOf(accountConfig.getKey()));
