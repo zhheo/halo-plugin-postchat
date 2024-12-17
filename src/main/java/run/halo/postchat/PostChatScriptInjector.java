@@ -39,14 +39,15 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
             reactiveSettingFetcher.fetch("account", AccountConfig.class).map(Optional::ofNullable),
             reactiveSettingFetcher.fetch("summary", SummaryConfig.class).map(Optional::ofNullable)
         )
-        .flatMap(tuple -> {
+        .flatMap(tuple -> Mono.fromCallable(() -> {
             PostChatConfig postChatConfig = tuple.getT1().orElse(new PostChatConfig());
             AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
             SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
             
-            model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
-            return Mono.empty();
-        })
+            String script = postChatScript(postChatConfig, accountConfig, summaryConfig);
+            model.add(modelFactory.createText(script));
+            return Void.TYPE;
+        }))
         .then()
         .subscribeOn(Schedulers.boundedElastic());
     }
