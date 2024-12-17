@@ -35,24 +35,20 @@ public class PostChatScriptInjector implements TemplateHeadProcessor {
         final IModelFactory modelFactory = context.getModelFactory();
 
         return Mono.zip(
-            fetchSetting("chat", PostChatConfig.class),
-            fetchSetting("account", AccountConfig.class),
-            fetchSetting("summary", SummaryConfig.class)
-        ).flatMap(tuple -> {
+            reactiveSettingFetcher.fetch("chat", PostChatConfig.class).map(Optional::ofNullable),
+            reactiveSettingFetcher.fetch("account", AccountConfig.class).map(Optional::ofNullable),
+            reactiveSettingFetcher.fetch("summary", SummaryConfig.class).map(Optional::ofNullable)
+        )
+        .flatMap(tuple -> {
             PostChatConfig postChatConfig = tuple.getT1().orElse(new PostChatConfig());
             AccountConfig accountConfig = tuple.getT2().orElse(new AccountConfig());
             SummaryConfig summaryConfig = tuple.getT3().orElse(new SummaryConfig());
             
             model.add(modelFactory.createText(postChatScript(postChatConfig, accountConfig, summaryConfig)));
             return Mono.empty();
-        }).then()
+        })
+        .then()
         .subscribeOn(Schedulers.boundedElastic());
-    }
-
-    private <T> Mono<java.util.Optional<T>> fetchSetting(String group, Class<T> clazz) {
-        return reactiveSettingFetcher.fetch(group, clazz)
-            .map(Optional::ofNullable)
-            .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Data
