@@ -8,7 +8,7 @@
 
 ## 简介
 
-![quickshot.webp](https://img.zhheo.com/i/2024/12/16/675fa3d24b0f7.webp)
+![quickshot.webp](https://img.zhheo.com/i/2024/06/21/6674f00f3eb9d.webp)
 
 PostChat是一个专为中小开发者与站长开发的AI增强工具，可以在网站中插入聊天机器人和智能摘要生成的功能。本项目提供专为Halo博客系统的插件安装包，你可以在Halo博客中安装使用，避免了插入代码的繁琐。
 
